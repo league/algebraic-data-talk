@@ -54,6 +54,11 @@ xcolornames=x11names,svgnames,dvipsnames]{beamer}
   breakatwhitespace=true,
   tabsize=3,
 }
+\lstdefinestyle{repl}{
+  language=Haskell,
+  frame=single,
+  backgroundcolor={\color{background}},
+}
 
 %%%_* Metadata
 %%%_* Document
@@ -65,23 +70,206 @@ xcolornames=x11names,svgnames,dvipsnames]{beamer}
 \maketitle
 
 \begin{frame}
-  \frametitle{Theory}
-  polymorphically-typed $\lambda$-calculus
+  \frametitle{Underlying theory}
+  Programming languages based on the 
+  \textbf{polymorphic typed $\lambda$ calculus}
+  \begin{itemize}
+  \item Alonzo Church (1936)
+  \item Haskell Curry (1958)
+  \item William Alvin Howard (1969)
+  \item Jean-Yves Girard (1972)
+  \item John C. Reynolds (1974)
+  \item Henk Barendregt (1984)
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Haskell}
+  \frametitle{Curry-Howard isomorphism}
+  A direct correspondence between \textbf{computer programs} and
+  \textbf{mathematical proofs.}
+  \begin{itemize}
+  \item \textbf{Types} in the programming language correspond to
+    \textbf{propositions} in higher-order logic.
+  \end{itemize}
+  \begin{center}
+      \begin{tabular}{lll}
+        &\bf logic&\bf type system\\
+        $\wedge$ & conjunction & tuple\\
+        $\vee$& disjunction & alternative\\
+        $\rightarrow$& implication & function\\
+        $\forall$&quantification& generic\\
+      \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Haskell Programming Language}
+  \begin{itemize}
+  \item First defined in 1990, as an open standard based on the
+    proprietary language \textbf{Miranda} (1985)
+  \item Standardized in 1998 and again in 2010
+  \item Premiere implementation today is the\\\textbf{Glasgow Haskell
+      Compiler} (GHC)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile,fragile]
+  \frametitle{Defining a binary tree}
+\begin{lstlisting}
+data BinaryTree a
+     = Empty
+     | Node (BinaryTree a) a (BinaryTree a)
+     deriving Show
+\end{lstlisting}
+\begin{lstlisting}[style=repl]
+> let t0 = Node (Node (Node Empty 2 Empty) 4
+                      (Node Empty 6 Empty)) 8 Empty
+\end{lstlisting}
+  \includegraphics[scale=0.3]{t0.png}
+\end{frame}
+
+\begin{frame}[fragile,fragile]
+  \frametitle{Binary tree operations -- size}
+\begin{lstlisting}
+data BinaryTree a = Empty
+     | Node (BinaryTree a) a (BinaryTree a)
+
+size :: BinaryTree a -> Integer
+size Empty = 0
+size (Node left value right) =
+     1 + size left + size right
+\end{lstlisting}
+\begin{lstlisting}[style=repl]
+> size t0
+4
+\end{lstlisting}
+    \includegraphics[scale=0.25]{t0.png}
+\end{frame}
+
+\begin{frame}[fragile,fragile]
+  \frametitle{Binary tree operations -- height}
+\begin{lstlisting}
+data BinaryTree a = Empty
+     | Node (BinaryTree a) a (BinaryTree a)
+
+height :: BinaryTree a -> Integer
+height Empty = 0
+height (Node left value right) =
+       1 + max (height left) (height right)
+\end{lstlisting}
+\begin{lstlisting}[style=repl]
+> height t0
+3
+\end{lstlisting}
+    \includegraphics[scale=0.25]{t0.png}
+\end{frame}
+
+\begin{frame}[fragile,fragile]
+  \frametitle{Binary tree operations -- search}
+\begin{lstlisting}
+search :: Ord a => BinaryTree a -> a -> Bool
+search Empty _ = False
+search (Node _ x _) y | y == x = True
+search (Node l x _) y | y < x = search l y
+search (Node _ x r) y = search r y
+\end{lstlisting}
+\begin{lstlisting}[style=repl]
+> search t0 6
+True
+> search t0 5
+False
+\end{lstlisting}
+    \includegraphics[scale=0.25]{t0.png}
+\end{frame}
+
+\begin{frame}[fragile,fragile]
+  \frametitle{Binary tree operations -- insert}
+\begin{lstlisting}
+insert :: Ord a => BinaryTree a -> a -> BinaryTree a
+insert Empty y = (Node Empty y Empty)
+insert (Node l x r) y | y < x = Node (insert l y) x r
+insert (Node l x r) y = Node l x (insert r y)
+\end{lstlisting}
+\begin{lstlisting}[style=repl]
+> insert t0 5
+\end{lstlisting}
+    \includegraphics[scale=0.25]{t5.png}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Blah}
-\begin{lstlisting}
-data Tree a = Leaf a | Branch (Tree a) (Tree a)
-     deriving Show
+  \frametitle{Fold over a list}
+\begin{lstlisting}[style=repl]
+> foldl insert Empty [2,4..14]
+\end{lstlisting}
+\includegraphics[scale=0.25]{t1.png}  
+\end{frame}
 
-height :: Tree a -> Integer
-height (Leaf _) = 0
-height (Branch l r) = 1 + max (height l) (height r)
+\begin{frame}[fragile,fragile]
+  \frametitle{Balanced binary tree (Red-Black)}
+\begin{lstlisting}
+data Color = Red | Black
+
+data RedBlackTree a
+     = Empty
+     | Node Color (RedBlackTree a) a (RedBlackTree a)
+\end{lstlisting}
+  \begin{itemize}
+  \item A node is either red or black.
+\item The root is black, all leaves are black.
+\item Every red node must have two black child nodes.
+\item Every path from a given node to any of its descendant leaves
+  contains the same number of black nodes.
+  \end{itemize}
+\end{frame}
+
+\newcommand{\showanim}[2]{
+  \begin{frame}
+    \frametitle{Insert $#1$}
+    \begin{center}
+      \includegraphics[scale=0.4]{#2.png}
+    \end{center}
+  \end{frame}}
+
+\showanim{4}{a001}
+\showanim{3}{a002}
+\showanim{2}{a003}
+\showanim{1}{a004}
+\showanim{0}{a005}
+\showanim{9}{a006}
+\showanim{8}{a007}
+\showanim{7}{a008}
+\showanim{6}{a009}
+\showanim{5}{a010}
+
+\begin{frame}
+  \frametitle{(etc.)}
+  \begin{center}
+    \includegraphics[scale=0.25]{r4.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile,fragile]
+  \frametitle{Red-Black insertion}
+\begin{lstlisting}
+insert :: Ord a => RedBlackTree a -> a ->
+    RedBlackTree a
+insert t x = Node Black a z b
+  where Node _ a z b = ins t
+        ins Empty = Node Red Empty x Empty
+        ins (Node Black a y b) =
+            if x < y then balance (ins a) y b
+            else balance a y (ins b)
+        ins (Node Red a y b) =
+            if x < y then Node Red (ins a) y b
+            else Node Red a y (ins b)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Red-Black rebalancing}
+\begin{lstlisting}
+balance :: RedBlackTree a -> a -> RedBlackTree a ->
+    RedBlackTree a
 \end{lstlisting}
 \end{frame}
 
@@ -124,38 +312,14 @@ balance (Node Red a x (Node Red b y c)) z d =
   \end{tabular}
 \end{frame}
 
-\newcommand{\showanim}[2]{
-  \begin{frame}
-    \frametitle{Insert $#1$}
-    \begin{center}
-      \includegraphics[scale=0.4]{#2.png}
-    \end{center}
-  \end{frame}}
-
-\showanim{4}{a001}
-\showanim{3}{a002}
-\showanim{2}{a003}
-\showanim{1}{a004}
-\showanim{0}{a005}
-\showanim{9}{a006}
-\showanim{8}{a007}
-\showanim{7}{a008}
-\showanim{6}{a009}
-\showanim{5}{a010}
-
-\begin{frame}
-  \frametitle{(etc.)}
-  \begin{center}
-    \includegraphics[scale=0.25]{r4.png}
-  \end{center}
-\end{frame}
-
 \begin{frame}
   \frametitle{Resources}
   \begin{itemize}
-  \item Source 
+  \item \textbf{Source available} at
+    \url{https://github.com/league/algebraic-data-talk}
   \item \textbf{Purely Functional Data Structures} by Chris Okasaki
     (Cambridge University Press, 1999)
+    \url{http://amzn.com/0521663504}
   \item The Haskell Programming Language \url{http://www.haskell.org/}
   \item \LaTeX{} Document Preparation System
     \url{http://www.latex-project.org/}

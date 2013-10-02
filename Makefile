@@ -1,5 +1,5 @@
 
-default: t1.png t2.png t3.png r1.png r2.png r3.png r4.png z1a.png z1b.png z2a.png z2b.png z3a.png
+default: t1.png t2.png t3.png r1.png r2.png r3.png r4.png z1a.png z1b.png z2a.png z2b.png z3a.png t0.png t5.png
 
 t1.dot t2.dot t3.dot: BinaryTree
 	./BinaryTree

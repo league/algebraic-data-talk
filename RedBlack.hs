@@ -37,21 +37,15 @@ insert t x = Node Black a z b
 balance :: RedBlackTree a -> a -> RedBlackTree a -> RedBlackTree a
 balance (Node Red a x b) y (Node Red c z d) =
     Node Red (Node Black a x b) y (Node Black c z d)
-
 balance (Node Red (Node Red a x b) y c) z d =
     Node Red (Node Black a x b) y (Node Black c z d)
-
 balance (Node Red a x (Node Red b y c)) z d =
     Node Red (Node Black a x b) y (Node Black c z d)
-
 balance a x (Node Red b y (Node Red c z d)) =
     Node Red (Node Black a x b) y (Node Black c z d)
-
 balance a x (Node Red (Node Red b y c) z d) =
     Node Red (Node Black a x b) y (Node Black c z d)
-
 balance l x r = Node Black l x r
---balance a x b = T B a x b
 
 
 style :: Color -> String

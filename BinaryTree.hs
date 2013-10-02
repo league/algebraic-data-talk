@@ -16,11 +16,11 @@ height Empty = 0
 height (Node left value right) =
        1 + max (height left) (height right)
 
-search :: Eq a => BinaryTree a -> a -> Bool
+search :: Ord a => BinaryTree a -> a -> Bool
 search Empty _ = False
-search (Node _ value _) goal | value == goal = True
-search (Node left _ right) goal =
-         search left goal || search right goal
+search (Node _ x _) y | y == x = True
+search (Node l x _) y | y < x = search l y
+search (Node _ x r) y = search r y
 
 inorder :: BinaryTree a -> [a]
 inorder Empty = []
@@ -31,11 +31,9 @@ add :: BinaryTree a -> a -> BinaryTree a
 add tree value = (Node tree value Empty)
 
 insert :: Ord a => BinaryTree a -> a -> BinaryTree a
-insert Empty new = (Node Empty new Empty)
-insert (Node left current right) new =
-    if new < current
-    then Node (insert left new) current right
-    else Node left current (insert right new)
+insert Empty y = (Node Empty y Empty)
+insert (Node l x r) y | y < x = Node (insert l y) x r
+insert (Node l x r) y = Node l x (insert r y)
 
 toDot :: Show a => Handle -> String -> BinaryTree a -> IO ()
 toDot h k Empty = hPutStrLn h $ k ++ " [label=\"\",shape=box,width=0.1,height=0.1]"
@@ -61,9 +59,12 @@ t1, t2, t3 :: BinaryTree Int
 t1 = foldl insert Empty $ map twice [1..7]
 t2 = foldl insert Empty $ map twice [4,2,1,3,6,5,7]
 t3 = foldl insert Empty $ [2,4,6,8,5,3,10]
+t0 = Node (Node (Node Empty 2 Empty) 4
+                (Node Empty 6 Empty)) 8 Empty
 
 main = do
   writeDot "t1.dot" t1
   writeDot "t2.dot" t2
   writeDot "t3.dot" t3
-
+  writeDot "t0.dot" t0
+  writeDot "t5.dot" $ insert t0 5
