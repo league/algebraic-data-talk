@@ -1,0 +1,15 @@
+digraph {
+y
+x [style=filled,fillcolor=red]
+z [style=filled,fillcolor=red]
+a [shape=triangle]
+b [shape=triangle]
+c [shape=triangle]
+d [shape=triangle]
+y -> x
+y -> z
+x -> a
+x -> b
+z -> c
+z -> d
+}
